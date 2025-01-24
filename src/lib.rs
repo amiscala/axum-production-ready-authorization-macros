@@ -13,6 +13,7 @@ use syn::parse::Parse;
 use syn::punctuated::Punctuated;
 
 #[proc_macro_attribute]
+//test
 pub fn require_scopes(attr: TokenStream, input: TokenStream) -> TokenStream {
     let scope_list = parse_macro_input!(attr as ScopeList);
     let scopes: Vec<_> = scope_list.scopes.iter().map(|lit| lit.value()).collect();
