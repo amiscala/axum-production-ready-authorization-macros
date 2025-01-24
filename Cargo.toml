@@ -1,0 +1,14 @@
+[package]
+name = "axum-production-ready-authorization-macros"
+version = "0.1.0"
+edition = "2021"
+description = "Lib that has proc macros to add scope filtering to the Axum Handlers"
+license = "MIT"
+readme = "README.md"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+quote = "1.0.38"
+syn = { version = "2.0.96", features = ["full"] }
