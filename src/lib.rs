@@ -1,14 +1,12 @@
 use syn::{GenericArgument, PathArguments, Type};
-use std::any::type_name;
-use syn::{FnArg, Path};
-use syn::{Meta, Token};
+use syn::{FnArg};
+use syn::{Token};
 use proc_macro::TokenStream;
-use quote::{quote, ToTokens};
+use quote::{quote};
 use syn::parse::ParseStream;
 use syn::parse_quote;
-use syn::{parse_macro_input, Attribute, ItemFn};
-use syn::{Expr, Lit, LitStr};
-use syn::token::{At, Comma};
+use syn::{parse_macro_input, ItemFn};
+use syn::{LitStr};
 use syn::parse::Parse;
 use syn::punctuated::Punctuated;
 
@@ -25,8 +23,7 @@ pub fn require_scopes(attr: TokenStream, input: TokenStream) -> TokenStream {
     if !is_extension_of_jwtclaims(&func) {
         func.sig.inputs.insert(0, jwt_claims);
     }
-
-    // Extract the function body
+    // Gets the fn body
     let body = &func.block;
 
 
@@ -42,12 +39,12 @@ pub fn require_scopes(attr: TokenStream, input: TokenStream) -> TokenStream {
         #body
     });
 
-    // Generate the modified function
+    // Recreate the FN
     let output = quote! {
         #func
     };
 
-    // Convert the generated code back into a TokenStream
+    // finally converts to TokenStream
     output.into()
 }
 
