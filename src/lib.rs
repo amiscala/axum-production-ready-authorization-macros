@@ -1,14 +1,14 @@
-use syn::{GenericArgument, PathArguments, Type};
-use syn::{FnArg};
-use syn::{Token};
 use proc_macro::TokenStream;
-use quote::{quote};
+use quote::quote;
+use syn::parse::Parse;
 use syn::parse::ParseStream;
 use syn::parse_quote;
-use syn::{parse_macro_input, ItemFn};
-use syn::{LitStr};
-use syn::parse::Parse;
 use syn::punctuated::Punctuated;
+use syn::{parse_macro_input, ItemFn};
+use syn::FnArg;
+use syn::{GenericArgument, PathArguments, Type};
+use syn::LitStr;
+use syn::Token;
 
 #[proc_macro_attribute]
 pub fn require_scopes(attr: TokenStream, input: TokenStream) -> TokenStream {
