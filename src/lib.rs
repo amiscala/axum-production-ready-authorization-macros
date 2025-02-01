@@ -4,11 +4,11 @@ use syn::parse::Parse;
 use syn::parse::ParseStream;
 use syn::parse_quote;
 use syn::punctuated::Punctuated;
-use syn::{parse_macro_input, ItemFn};
 use syn::FnArg;
-use syn::{GenericArgument, PathArguments, Type};
 use syn::LitStr;
 use syn::Token;
+use syn::{parse_macro_input, ItemFn};
+use syn::{GenericArgument, PathArguments, Type};
 
 #[proc_macro_attribute]
 pub fn require_scopes(attr: TokenStream, input: TokenStream) -> TokenStream {
@@ -17,8 +17,8 @@ pub fn require_scopes(attr: TokenStream, input: TokenStream) -> TokenStream {
 
     let mut func = parse_macro_input!(input as ItemFn);
     let jwt_claims: FnArg = parse_quote!(
-            jwt_claims: Extension<Arc<JwtClaims>>
-        );
+        jwt_claims: Extension<Arc<JwtClaims>>
+    );
     // Only adds the Extension<Arc<JwtClaims>>> if it is not present on the handler
     if !is_extension_of_jwtclaims(&func) {
         func.sig.inputs.insert(0, jwt_claims);
@@ -26,12 +26,11 @@ pub fn require_scopes(attr: TokenStream, input: TokenStream) -> TokenStream {
     // Gets the fn body
     let body = &func.block;
 
-
     // Adds the custom logic to handle the authorization of the handler.
     func.block = syn::parse_quote!({
         let required_scopes = vec![#(#scopes),*];
         let received_scopes = jwt_claims.scopes.split(" ").collect::<Vec<_>>();
-    
+
         if !received_scopes.iter().any(|scope| required_scopes.contains(scope)) && !received_scopes.contains(&"all") {
             let message = format!("Missing Required Scopes: {:?}, Received Scopes: {:?}", required_scopes, received_scopes);
             Err(AppErrors::Forbidden(message.to_string()))?;
@@ -54,7 +53,9 @@ struct ScopeList {
 
 impl Parse for ScopeList {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        Ok(ScopeList { scopes: Punctuated::parse_terminated(input)? })
+        Ok(ScopeList {
+            scopes: Punctuated::parse_terminated(input)?,
+        })
     }
     // fn parse(input: ParseStream) -> Result<Self> {
     //     let scopes = input.parse_terminated(LitStr::parse)?;
@@ -70,15 +71,26 @@ fn is_extension_of_jwtclaims(func: &syn::ItemFn) -> bool {
                 if let Some(first_segment) = type_path.path.segments.first() {
                     if first_segment.ident == "Extension" {
                         // Check if it has generic arguments
-                        if let PathArguments::AngleBracketed(angle_brackets) = &first_segment.arguments {
+                        if let PathArguments::AngleBracketed(angle_brackets) =
+                            &first_segment.arguments
+                        {
                             // Look for the inner type `Arc<JwtClaims>`
-                            if let Some(GenericArgument::Type(Type::Path(inner_type_path))) = angle_brackets.args.first() {
+                            if let Some(GenericArgument::Type(Type::Path(inner_type_path))) =
+                                angle_brackets.args.first()
+                            {
                                 if let Some(inner_segment) = inner_type_path.path.segments.first() {
                                     if inner_segment.ident == "Arc" {
                                         // Check if `Arc` wraps `JwtClaims`
-                                        if let PathArguments::AngleBracketed(arc_angle_brackets) = &inner_segment.arguments {
-                                            if let Some(GenericArgument::Type(Type::Path(jwt_type_path))) = arc_angle_brackets.args.first() {
-                                                if let Some(jwt_segment) = jwt_type_path.path.segments.first() {
+                                        if let PathArguments::AngleBracketed(arc_angle_brackets) =
+                                            &inner_segment.arguments
+                                        {
+                                            if let Some(GenericArgument::Type(Type::Path(
+                                                jwt_type_path,
+                                            ))) = arc_angle_brackets.args.first()
+                                            {
+                                                if let Some(jwt_segment) =
+                                                    jwt_type_path.path.segments.first()
+                                                {
                                                     return jwt_segment.ident == "JwtClaims";
                                                 }
                                             }
